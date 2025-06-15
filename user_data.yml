@@ -1,0 +1,18 @@
+#cloud-config
+users:
+  - name: ansible
+    groups: sudo
+    shell: /bin/bash
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCV+CgKDJFErmBLBymO//JVe7NmhXpcdqPmgfSaoZC2AmidpyUYu1A4Dl6c9hNLZt6ImSBVr9UfTiWJvG/sM2epw7ZximWfIYh9PW+Z3HG6cdio+BQuBuPaSxbUJUSGorlG2u5a655EDJAy+sF6krkF0Bw4A54vRuksZH4U4Ke0umE2asHbaRxrn5K20CqiL4Wn6e2ipZ2I9VjvRoqqALmRbvESCHBUvXz3fU18HAvrkxfEahPQoHmJqt+fx3SDLk00K+W9RMUQBxX2I8S7QfzZpj4ZLsXwFFv1stC/qH+1em/120JIQeZh84ukAzFesarAboK1af1LzLfNcmbIB3SeKodKkaRTL0kN2c6bNFJcvSnS31rIi/ElwZUGNk0gmpySVMsoZbv2cSvJL/OAKFTBxrWYyr9oHp5Wz4fL/PT+ZeV4M3Gi3+SIhji3eQXFbTGEbJ7L9MK7Fv/IB1kYjT9blazA1yapxwEv9xox1pydOJqXn5gO/ggbOXB2w2M2110= student@fhmuvb3nhg8fc61da6cn
+    lock_passwd: false
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - nginx
