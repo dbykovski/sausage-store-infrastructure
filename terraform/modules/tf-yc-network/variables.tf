@@ -1,11 +1,22 @@
-variable "instance_zone" {
-  default     = "ru-central1-a"
+variable "network_name" {
+  description = "Имя VPC сети"
   type        = string
-  description = "Instance availability zone"
-  validation {
-    condition     = contains(toset(["ru-central1-a", "ru-central1-b", "ru-central1-c"]), var.instance_zone)
-    error_message = "Select availability zone from the list: ru-central1-a, ru-central1-b, ru-central1-c."
+}
+
+variable "subnets" {
+  description = "Map подсетей с зоной и cidr"
+  type = map(object({
+    zone       = string
+    cidr_block = string
+  }))
+  default = {
+    "a" = {
+      zone       = "ru-central1-a"
+      cidr_block = "10.128.0.0/24"
+    },
+    "b" = {
+      zone       = "ru-central1-b"
+      cidr_block = "10.128.1.0/24"
+    }
   }
-  sensitive = true
-  nullable = false
-} 
+}

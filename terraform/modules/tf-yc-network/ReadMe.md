@@ -32,7 +32,7 @@ ru-central1-c
 Обязательность: Обязательный параметр (nullable = false)
 
 Выходные данные (outputs)
-yandex_vpc_subnets
+subnet_ids
 Описание: Карта подсетей Yandex.Cloud
 
 Тип: Map объектов подсетей

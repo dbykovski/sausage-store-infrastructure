@@ -20,8 +20,15 @@ variable "image_id" {
 }
 
 variable "subnet_id" {
-    default = "e9bdpppjobeo3atffkdu"
+    default = "enpejjjr3bt3k09b7io4"
     description = "Yandex Cloud subnet_id"
+    type = string
+    sensitive = true    
+}
+
+variable "name" {
+    default = "chapter5-lesson2-std-ext-019-01"
+    description = "VM name"
     type = string
     sensitive = true    
 }

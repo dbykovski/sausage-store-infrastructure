@@ -1,5 +1,5 @@
 resource "yandex_compute_instance" "vm-1" {
-    name = "chapter5-lesson2-std-ext-019-01"
+    name = var.name
     platform_id = var.platform_id
     zone     = var.network_zone
 
@@ -28,7 +28,7 @@ resource "yandex_compute_instance" "vm-1" {
     # нужно указать идентификатор подсети, к которой будет подключена ВМ
     network_interface {
         subnet_id = var.subnet_id
-        nat       = false
+        nat       = true
     }
 
     # Метаданные машины:
