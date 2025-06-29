@@ -1,4 +1,4 @@
-module "instance" {
+module "network" {
   source = "./tf-yc-instance"  # Путь к модулю ВМ
 
   # Обязательные параметры модуля ВМ
