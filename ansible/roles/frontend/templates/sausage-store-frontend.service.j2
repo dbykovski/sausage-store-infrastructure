@@ -1,0 +1,11 @@
+[Unit]
+Description=sausage-store frontend service
+After=network.target
+
+[Service]
+User=www-data
+ExecStart=/usr/bin/node /var/www-data/dist/server.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

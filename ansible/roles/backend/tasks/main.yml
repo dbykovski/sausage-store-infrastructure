@@ -1,0 +1,51 @@
+---
+- name: Установка OpenJDK 16
+  apt:
+    name: openjdk-16-jdk
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+  register: java_installed
+  when: "'openjdk-16-jdk' not in ansible_facts.packages"
+
+- name: Выбираем OpenJDK 16 по умолчанию
+  alternatives:
+    name: java
+    path: "/usr/lib/jvm/java-16-openjdk-amd64/bin/java"
+  when: java_installed.changed
+  become: yes
+
+- name: Создаем сервисного пользователя для backend
+  user:
+    name: jarservice
+    shell: /sbin/nologin
+    create_home: no
+  become: yes
+  when: "'jarservice' not in ansible_facts.users"
+
+- name: Создаем директорию для backend (jar-файла)
+  file:
+    path: /opt/sausage-store/bin
+    state: directory
+    owner: jarservice
+    group: jarservice
+    mode: '0755'
+  become: yes
+
+- name: Загружаем артефакт backend из Nexus
+  get_url:
+    url: "https://nexus.praktikum-services.tech/repository/std-ext-019-01-backend/com/yandex/practicum/devops/sausage-store/{{ backend_version }}/sausage-store-{{ backend_version }}.jar"
+    dest: "/opt/sausage-store/bin/sausage-store.jar"
+    mode: '0644'
+    url_username: "{{ nexus_user }}"
+    url_password: "{{ nexus_password }}"
+    checksum: "sha256:{{ expected_checksum }}"
+  become: yes
+
+- name:  Копируем systemd-юнит из шаблона
+  template:
+    src: sausage-store-backend.service.j2
+    dest: /etc/systemd/system/sausage-store-backend.service
+    notify: restart sausage-store-backend
+  become: yes

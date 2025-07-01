@@ -1,0 +1,54 @@
+---
+- name: Добавляем NodeSource репозиторий
+  apt_repository:
+    repo: deb https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Устанавливаем nodejs
+  apt:
+    name: nodejs
+    state: present
+  become: yes
+
+- name: Создаем пользователя для frontend (www-data)
+  user:
+    name: www-data
+    shell: /usr/sbin/nologin
+    create_home: no
+  become: yes
+
+- name: Создаем директорию для frontend
+  file:
+    path: /var/www-data
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  become: yes
+
+- name: Загружаем артефакт frontend из Nexus
+  get_url:
+    url: "https://nexus.praktikum-services.tech/repository/std-ext-019-01-frontend/{{ frontend_version }}/sausage-store-{{ frontend_version }}.tar.gz"
+    dest: /var/www-data/sausage-store-frontend.tar.gz
+    mode: '0755'
+    url_username: "{{ nexus_user }}"
+    url_password: "{{ nexus_password }}"
+  become: yes
+
+- name: Распаковка frontend
+  unarchive:
+    src: /var/www-data/sausage-store-frontend.tar.gz
+    dest: /var/www-data/
+    owner: www-data
+    group: www-data
+    remote_src: yes
+    keep_newer: yes
+  become: yes
+
+- name: Копируем systemd-юнит из шаблона
+  template:
+    src: sausage-store-frontend.service.j2
+    dest: /etc/systemd/system/sausage-store-frontend.service
+  become: yes
