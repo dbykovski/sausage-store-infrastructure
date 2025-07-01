@@ -1,4 +1,9 @@
 ---
+- name: Устанавливаем GPG-ключ NodeSource
+  ansible.builtin.apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state: present
+
 - name: Добавляем NodeSource репозиторий
   apt_repository:
     repo: deb https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main
@@ -47,8 +52,8 @@
     keep_newer: yes
   become: yes
 
-- name: Копируем systemd-юнит из шаблона
+- name: Конфигурируем nginx
   template:
-    src: sausage-store-frontend.service.j2
-    dest: /etc/systemd/system/sausage-store-frontend.service
-  become: yes
+    src: nginx-sausage-store-frontend.conf.j2
+    dest: "/etc/nginx/sites-available/default"
+  notify: Reload Nginx
