@@ -1,0 +1,13 @@
+[Unit]
+Description=sausage-store backend service
+After=network.target
+
+[Service]
+User=jarservice
+Environment=REPORT_PATH=/opt/sausage-store/reports
+ExecStart=/usr/bin/java -Xrs -jar /opt/sausage-store/bin/sausage-store.jar
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,67 @@
+---
+# Устанавливаем GPG-ключ NodeSource
+- name: Install GPG-key NodeSource
+  ansible.builtin.apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state: present
+
+# Добавляем NodeSource репозиторий
+- name: Adding NodeSource repository
+  apt_repository:
+    repo: deb https://deb.nodesource.com/node_18.x {{ ansible_distribution_release }} main
+    state: present
+    update_cache: yes
+  become: yes
+
+# Устанавливаем nodejs
+- name: Install nodejs
+  apt:
+    name: nodejs
+    state: present
+  become: yes
+
+# Создаем пользователя для frontend (www-data)
+- name: Create a user for the frontend (www-data)
+  user:
+    name: www-data
+    shell: /usr/sbin/nologin
+    create_home: no
+  become: yes
+
+# Создаем директорию для frontend
+- name: Create a directory for frontend
+  file:
+    path: /var/www-data
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  become: yes
+
+# Загружаем артефакт frontend из Nexus
+- name: Downloading the frontend artifact from Nexus
+  get_url:
+    url: "https://nexus.praktikum-services.tech/repository/std-ext-019-01-frontend/{{ frontend_version }}/sausage-store-{{ frontend_version }}.tar.gz"
+    dest: /var/www-data/sausage-store-frontend.tar.gz
+    mode: '0755'
+    url_username: "{{ nexus_user }}"
+    url_password: "{{ nexus_password }}"
+  become: yes
+
+# Распаковка frontend
+- name: Unpacking the frontend
+  unarchive:
+    src: /var/www-data/sausage-store-frontend.tar.gz
+    dest: /var/www-data/
+    owner: www-data
+    group: www-data
+    remote_src: yes
+    keep_newer: yes
+  become: yes
+
+# Конфигурируем nginx
+- name: Configuration nginx
+  template:
+    src: nginx-sausage-store-frontend.conf.j2
+    dest: "/etc/nginx/sites-available/default"
+  notify: Reload Nginx

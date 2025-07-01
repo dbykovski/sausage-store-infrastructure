@@ -1,0 +1,8 @@
+# Установка Sausage Store
+- name: Install Sausage Store
+  hosts: all
+  become: yes
+  gather_facts: yes
+  roles:
+    - backend
+    - frontend

@@ -1,0 +1,42 @@
+# Игнорируем каталоги с ролями, скачанными извне (если используются)
+roles/galaxy/
+roles/external/
+
+# Игнорируем vault-файлы с секретами
+*.vault.yml
+*.vault.yaml
+*vault*
+secrets.yml
+secrets.yaml
+
+# Игнорируем временные файлы
+*.retry
+*.tmp
+*.swp
+
+# Игнорируем локальные файлы инвентаря
+inventory/local
+inventory/*.local
+inventory/*.bak
+
+# Игнорируем файлы окружения (env)
+.env
+.venv
+venv/
+
+# Игнорируем кэш и служебные файлы Ansible
+.ansible-lint
+.cache
+.retry
+.idea/
+.vscode/
+
+# Игнорируем сгенерированную документацию
+site/
+
+# Игнорируем логи
+*.log
+
+# Игнорируем личные файлы разработчика
+*.DS_Store
+*~
