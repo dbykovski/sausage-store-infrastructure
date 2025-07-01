@@ -1,4 +1,5 @@
-- name: Установка Sausage Store
+# Установка Sausage Store
+- name: Install Sausage Store
   hosts: all
   become: yes
   gather_facts: yes

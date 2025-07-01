@@ -3,7 +3,8 @@
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Установка OpenJDK 16
+# Установка OpenJDK 16
+- name: Install OpenJDK 16
   apt:
     name: openjdk-16-jdk
     state: present
@@ -13,14 +14,16 @@
   register: java_installed
   when: "'openjdk-16-jdk' not in ansible_facts.packages"
 
-- name: Выбираем OpenJDK 16 по умолчанию
+# Выбираем OpenJDK 16 по умолчанию
+- name: Set OpenJDK 16 as default
   alternatives:
     name: java
     path: "/usr/lib/jvm/java-16-openjdk-amd64/bin/java"
   when: java_installed.changed
   become: yes
 
-- name: Создаем сервисного пользователя для backend
+# Создаем сервисного пользователя для backend
+- name: Create a service user for the backend
   ansible.builtin.user:
     name: jarservice
     shell: /sbin/nologin
@@ -28,7 +31,8 @@
     state: present
   become: yes
 
-- name: Создаем директорию для backend (jar-файла)
+# Создаем директорию для backend (jar-файла)
+- name: Create a directory for the backend (jar file)
   file:
     path: /opt/sausage-store/bin
     state: directory
@@ -37,7 +41,8 @@
     mode: '0755'
   become: yes
 
-- name: Загружаем артефакт backend из Nexus
+# Загружаем артефакт backend из Nexus
+- name: Downloading the backend artifact from Nexus 
   get_url:
     url: "https://nexus.praktikum-services.tech/repository/std-ext-019-01-backend/com/yandex/practicum/devops/sausage-store/{{ backend_version }}/sausage-store-{{ backend_version }}.jar"
     dest: "/opt/sausage-store/bin/sausage-store.jar"
@@ -46,17 +51,20 @@
     url_password: "{{ nexus_password }}"
   become: yes
 
-- name:  Копируем systemd-юнит из шаблона
+# Копируем systemd-юнит из шаблона
+- name: Copy the systemd unit from the template
   template:
     src: sausage-store-backend.service.j2
     dest: /etc/systemd/system/sausage-store-backend.service
   become: yes
 
-- name: Перечитываем конфигурацию systemd
+# Перечитываем конфигурацию systemd
+- name: Daemon reload
   systemd:
     daemon_reload: yes
 
-- name: Запускаем systemd-юнит
+# Запускаем systemd-юнит
+- name: Daemon start
   service:
     name: sausage-store-backend
     state: started
