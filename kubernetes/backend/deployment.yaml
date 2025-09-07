@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,50 +5,60 @@ metadata:
   labels:
     app: backend
 spec:
-  containers:
-    - image: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store/sausage-backend:latest
-      name: backend
-      imagePullPolicy: IfNotPresent
-      env:
-        - name: SPRING_DATASOURCE_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: spring-datasource-username
-        - name: SPRING_DATASOURCE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: spring-datasource-password
-        - name: SPRING_DATASOURCE_URL
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: spring-datasource-url
-        - name: SPRING_DATA_MONGODB_URI
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: spring-data-mongodb-uri
-        - name: POSTGRES_DBNAME
-          valueFrom:
-            secretKeyRef:
-              name: postgres
-              key: postgres_dbname
-        - name: BACKEND_PORT
-          value: "8080"
-        - name: SPRING_FLYWAY_BASELINE
-          value: "true"
-      ports:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      imagePullSecrets:
+        - name: docker-config-secret
+      containers:
         - name: backend
-          containerPort: 8080
-      livenessProbe:
-        httpGet:
-          path: /actuator/health
-          port: 8080
-        initialDelaySeconds: 15
-        periodSeconds: 30
-        timeoutSeconds: 2
-        failureThreshold: 6
-  imagePullSecrets:
-    - name: docker-config-secret
+          image: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store/sausage-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: spring-datasource-username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: spring-datasource-password
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: spring-datasource-url
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: spring-data-mongodb-uri
+            - name: SPRING_FLYWAY_BASELINE
+              value: "true"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3

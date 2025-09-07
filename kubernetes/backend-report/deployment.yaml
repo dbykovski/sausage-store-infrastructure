@@ -6,17 +6,37 @@ metadata:
   labels:
     app: backend-report
 spec:
-  containers:
-    - image: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store/sausage-frontend:latest
-      name: backend-report
-      imagePullPolicy: IfNotPresent
-      livenessProbe:
-        httpGet:
-          path: /actuator/health
-          port: 8080
-        initialDelaySeconds: 15
-        periodSeconds: 30
-        timeoutSeconds: 2
-        failureThreshold: 6
-  imagePullSecrets:
-    - name: docker-config-secret
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-report
+  template:
+    metadata:
+      labels:
+        app: backend-report
+    spec:
+      imagePullSecrets:
+        - name: docker-config-secret
+      containers:
+        - name: backend-report
+          image: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store/sausage-backend-report:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
