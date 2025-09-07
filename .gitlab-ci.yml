@@ -14,7 +14,7 @@ deploy-kuber:
   before_script:
     - set -euo pipefail
     - mkdir -p $HOME/.kube
-    - echo -n $KUBE_CONFIG > $HOME/.kube/config
+    - printf '%s' "$KUBE_CONFIG" > "$HOME/.kube/config"
   script:
     - cd kubernetes
     - kubectl apply -f namespace.yaml
