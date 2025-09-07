@@ -3,7 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-report
-  namespace: sausage-store
   labels:
     app: backend-report
 spec:

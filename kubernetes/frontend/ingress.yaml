@@ -3,7 +3,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: frontend
-  namespace: sausage-store
 spec:
   # В кластере может быть несколько Ingress Controllers, мы используем NGINX
   ingressClassName: "nginx"
