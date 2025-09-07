@@ -1,6 +1,9 @@
 stages:
   - deploy
 
+variables:
+  KUBE_NAMESPACE: "sausage-store"
+
 deploy-kuber:
   stage: deploy
   image: bitnami/kubectl:1.24.3
@@ -14,6 +17,7 @@ deploy-kuber:
     - echo -n $KUBE_CONFIG | base64 -d > $HOME/.kube/config
   script:
     - cd kubernetes
+    - kubectl apply -f namespace.yaml
     - |
       kubectl create secret generic app-secrets \
         --from-literal=spring-datasource-password="$SPRING_DATASOURCE_PASSWORD" \
@@ -21,10 +25,10 @@ deploy-kuber:
         --from-literal=spring-datasource-url="$SPRING_DATASOURCE_URL" \
         --from-literal=spring-data-mongodb-uri="$SPRING_DATA_MONGODB_URI" \
         --dry-run=client -o yaml | kubectl apply -f -
-    - kubectl apply -f secrets.yaml
-    - kubectl apply -f backend -f backend-report -f frontend
-    - kubectl rollout status deploy/backend --timeout=120s || (kubectl describe deploy/backend; kubectl get pods -l app=backend; exit 1)
-    - kubectl rollout status deploy/frontend --timeout=120s || (kubectl describe deploy/frontend; kubectl get pods -l app=frontend; exit 1)
-    - kubectl rollout status deploy/backend-report --timeout=120s || (kubectl describe deploy/backend-report; kubectl get pods -l app=backend-report; exit 1)
+    - kubectl apply -n $KUBE_NAMESPACE -f secrets.yaml
+    - kubectl apply -n $KUBE_NAMESPACE -f backend -f backend-report -f frontend
+    - kubectl rollout status deploy/backend -n $KUBE_NAMESPACE --timeout=120s || (kubectl describe deploy/backend; kubectl get pods -l app=backend; exit 1)
+    - kubectl rollout status deploy/frontend -n $KUBE_NAMESPACE --timeout=120s || (kubectl describe deploy/frontend; kubectl get pods -l app=frontend; exit 1)
+    - kubectl rollout status deploy/backend-report -n $KUBE_NAMESPACE --timeout=120s || (kubectl describe deploy/backend-report; kubectl get pods -l app=backend-report; exit 1)
   after_script:
     - rm $HOME/.kube/config
