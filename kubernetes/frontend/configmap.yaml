@@ -10,9 +10,8 @@ data:
       server_name _;
 
       location / {
-        root   /usr/share/nginx/html;
+        root /app/frontend;
         index  index.html;
-        try_files $uri $uri/ /index.html;
       }
 
       location /api/ {
