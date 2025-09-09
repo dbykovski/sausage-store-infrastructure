@@ -6,7 +6,9 @@ metadata:
   labels:
     app: backend-report
 spec:
-  replicas: 1
+  revisionHistoryLimit: 12
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: backend-report
@@ -15,6 +17,16 @@ spec:
       labels:
         app: backend-report
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              preference:
+                matchExpressions:
+                  - key: availability-zone
+                    operator: In
+                    values:
+                      - zone1 
       imagePullSecrets:
         - name: docker-config-secret
       containers:

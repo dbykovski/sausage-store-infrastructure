@@ -6,6 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
+  revisionHistoryLimit: 12
   replicas: 1
   selector:
     matchLabels:
@@ -21,6 +22,13 @@ spec:
         - name: frontend
           image: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store/sausage-frontend:latest
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
           ports:
             - name: http
               containerPort: 80
