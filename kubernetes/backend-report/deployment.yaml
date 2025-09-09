@@ -6,7 +6,6 @@ metadata:
   labels:
     app.kubernetes.io/name: backend-report
     app.kubernetes.io/instance: sausage-store
-    app.kubernetes.io/version: "${VERSION}"
 spec:
   revisionHistoryLimit: 12
   strategy:
@@ -19,7 +18,6 @@ spec:
       labels:
         app.kubernetes.io/name: backend-report
         app.kubernetes.io/instance: sausage-store
-        app.kubernetes.io/version: "${VERSION}"
     spec:
       affinity:
         nodeAffinity:
