@@ -4,7 +4,9 @@ kind: Deployment
 metadata:
   name: backend-report
   labels:
-    app: backend-report
+    app.kubernetes.io/name: backend-report
+    app.kubernetes.io/instance: sausage-store
+    app.kubernetes.io/version: "${VERSION}"
 spec:
   revisionHistoryLimit: 12
   strategy:
