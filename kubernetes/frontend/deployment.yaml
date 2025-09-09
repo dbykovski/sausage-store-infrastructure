@@ -47,7 +47,7 @@ spec:
             failureThreshold: 6
           readinessProbe:
             httpGet:
-              path: /
+              path: /frontend/index.html
               port: 80
             initialDelaySeconds: 3
             periodSeconds: 10
