@@ -12,6 +12,7 @@ deploy-kuber:
     - set -euo pipefail
     - mkdir -p $HOME/.kube
     - printf '%s' "$KUBE_CONFIG" > "$HOME/.kube/config"
+    - install_packages gettext-base || (apt-get update && apt-get install -y gettext-base && rm -rf /var/lib/apt/lists/*)
   script:
     - cd kubernetes
     - |
@@ -22,6 +23,10 @@ deploy-kuber:
         --from-literal=spring-data-mongodb-uri="$SPRING_DATA_MONGODB_URI" \
         --dry-run=client -o yaml | kubectl apply -f -
     - kubectl apply -f secrets.yaml
-    - kubectl apply -f backend -f backend-report -f frontend
+    - |
+      for f in backend/*.yaml backend-report/*.yaml frontend/*.yaml; do
+        echo "Applying $f with VERSION=${VERSION}"
+        envsubst '${VERSION}' < "$f" | kubectl apply -f -
+      done
   after_script:
     - rm $HOME/.kube/config
