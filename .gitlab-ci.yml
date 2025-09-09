@@ -23,6 +23,7 @@ deploy-kuber:
         --from-literal=spring-data-mongodb-uri="$SPRING_DATA_MONGODB_URI" \
         --dry-run=client -o yaml | kubectl apply -f -
     - kubectl apply -f secrets.yaml
+    - kubectl apply -f backend -f backend-report -f frontend
     - |
       for d in frontend backend backend-report; do
         echo "Patching $d with app.kubernetes.io/version=${VERSION}"
