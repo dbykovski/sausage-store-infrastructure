@@ -17,7 +17,9 @@ spec:
   template:
     metadata:
       labels:
-        app: backend-report
+        app.kubernetes.io/name: backend-report
+        app.kubernetes.io/instance: sausage-store
+        app.kubernetes.io/version: "${VERSION}"
     spec:
       affinity:
         nodeAffinity:
