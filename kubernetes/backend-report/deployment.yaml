@@ -16,6 +16,7 @@ spec:
   template:
     metadata:
       labels:
+        app: backend-report
         app.kubernetes.io/name: backend-report
         app.kubernetes.io/instance: sausage-store
     spec:
