@@ -30,6 +30,7 @@ deploy-kuber:
         kubectl patch deployment "$d" --type merge -p "{
           \"spec\": {\"template\": {\"metadata\": {\"labels\": {\"app.kubernetes.io/version\": \"${VERSION}\"}}}}
         }"
+      done
         kubectl set env deployment/"$d" APP_VERSION="$VERSION"
   after_script:
     - rm $HOME/.kube/config
