@@ -9,7 +9,10 @@ metadata:
 spec:
   revisionHistoryLimit: 12
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 20%
   selector:
     matchLabels:
       app: backend-report
@@ -29,7 +32,18 @@ spec:
                   - key: availability-zone
                     operator: In
                     values:
-                      - zone1 
+                      - zone1
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - backend-report
+                topologyKey: kubernetes.io/hostname
       imagePullSecrets:
         - name: docker-config-secret
       containers:
