@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "sausage-store.labels" . | nindent 4 }}
+spec:
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  replicas: {{ .Values.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 20%
+  selector:
+    matchLabels:
+      app: "{{ .Values.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.name }}"
+    spec:
+      containers:
+        - image: {{ .Values.global.imageRegistry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+          name: "{{ .Values.name }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "{{ .Values.global.springDatasourceUrl }}"
+            - name: BACKEND_PORT
+              value: {{ .Values.global.backend_port }}
+            - name: SPRING_FLYWAY_BASELINE
+              value: "{{ .Values.global.springFlywayBaseline }}"
+          ports:
+            - name: backend-report
+              containerPort: {{ .Values.global.backendPort | int }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.global.backendPort | int }}
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 6
+      imagePullSecrets:
+        - name: docker-config-secret-helm
