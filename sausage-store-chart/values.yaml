@@ -4,14 +4,13 @@ global:
   springFlywayBaseline: true
   appName: sausage-store
   environment: test
-  imageRegistry: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store/sausage-backend:latest
-
+  imageRegistry: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store
 secrets:
   postgres_datasource: ""
   dockerConfigJson: ""
 
 backend:
-  name: sausage-backend
+  name: backend
   revisionHistoryLimit: 12
   replicas: 3
   strategy:
@@ -21,7 +20,7 @@ backend:
       maxSurge: 20%
   image:
     name: "sausage-backend"
-    tag: "1.0.2380544"
+    tag: "latest"
   vpa:
     updateMode: "Off"
     resources:
@@ -33,7 +32,7 @@ backend:
         memory: 500Mi
 
 backend-report:
-  name: sausage-backend-report
+  name: backend-report
   revisionHistoryLimit: 12
   strategy:
   type: RollingUpdate
@@ -42,7 +41,7 @@ backend-report:
     maxSurge: 20%
   image:
     name: "sausage-backend-report"
-    tag: "1.0.2380546"
+    tag: "latest"
   hpa:
     resources:
       minReplicas: 2
@@ -50,14 +49,14 @@ backend-report:
       averageUtilization: 75
 
 frontend:
-  name: sausage-frontend
+  name: frontend
   revisionHistoryLimit: 12
   fqdn: "std-ext-019-01.k8s.praktikum-services.tech"
   port: 80
   replicas: 1
   image:
     name: "sausage-frontend"
-    tag: "1.0.2380542"
+    tag: "latest"
   resources:
     requests:
       cpu: "100m"
