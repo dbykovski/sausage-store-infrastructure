@@ -15,8 +15,7 @@ upload-helm:
     - apk --no-cache add git curl ca-certificates
     - helm plugin install https://github.com/chartmuseum/helm-push.git
     - >
-      helm repo add my-nexus \
-      "$NEXUS_REPO_HELM_URL" \
+      helm repo add my-nexus "$NEXUS_REPO_HELM_URL" \
       --username "$NEXUS_REPO_USER" \
       --password "$(echo "$NEXUS_REPO_PASS" | base64 -d)"
     - helm repo update
