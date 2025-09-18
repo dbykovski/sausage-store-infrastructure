@@ -8,20 +8,23 @@ variables:
 upload-helm:
   stage: release
   image: lwolf/helm-kubectl-docker:v1.21.1-v3.6.0
+  variables:
+    NEXUS_REPO_CONTEXT_PATH: "/repository/std-ext-019-01-helm/"
   before_script:
-    - mkdir -p $HOME/.kube
-    - echo -n $KUBE_CONFIG | base64 -d > $HOME/.kube/config
-    - chmod 600 $HOME/.kube/config
     - apk --no-cache add git curl ca-certificates
     - helm plugin install https://github.com/chartmuseum/helm-push.git
     - helm repo add my-nexus "$NEXUS_REPO_HELM_URL" --username "$NEXUS_REPO_USER" --password "$NEXUS_REPO_PASS"
     - helm repo update
   script:
     - cd sausage-store-chart
-    - helm package --version $VERSION ./
-    - helm cm-push "./sausage-store-${VERSION}.tgz" my-nexus
+    - helm package --version "$VERSION" .
+    - >
+      helm cm-push "./sausage-store-${VERSION}.tgz" my-nexus
+      --username "$NEXUS_REPO_USER"
+      --password "$NEXUS_REPO_PASS"
+      --context-path "$NEXUS_REPO_CONTEXT_PATH"
   after_script:
-    - rm $HOME/.kube/config
+    - rm -f "$HOME/.kube/config"
 
 deploy-helm:
   stage: deploy
@@ -40,7 +43,7 @@ deploy-helm:
   script:
     - helm repo add my-nexus "$NEXUS_REPO_HELM_URL" --username "$NEXUS_REPO_USER" --password "$NEXUS_REPO_PASS"
     - helm repo update
-    - |
+    - >
       helm upgrade --install sausage-store nexus/sausage-store \
         --set environment=test \
         --set frontend.fqdn="${SAUSAGE_STORE_URL}" \
