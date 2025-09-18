@@ -11,6 +11,8 @@ upload-helm:
   before_script:
     - mkdir -p $HOME/.kube
     - echo -n $KUBE_CONFIG | base64 -d > $HOME/.kube/config
+    - chmod 600 $HOME/.kube/config
+    - apk --no-cache add git curl ca-certificates
     - helm plugin install https://github.com/chartmuseum/helm-push.git
     - >
       helm repo add my-nexus \
