@@ -29,10 +29,6 @@ upload-helm:
 deploy-helm:
   stage: deploy
   image: lwolf/helm-kubectl-docker:v1.21.1-v3.6.0
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
-    - when: on_success
   environment:
     name: dev-helm
     url: https://$SAUSAGE_STORE_URL
