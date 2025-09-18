@@ -14,7 +14,10 @@ upload-helm:
     - chmod 600 $HOME/.kube/config
     - apk --no-cache add git curl ca-certificates
     - helm plugin install https://github.com/chartmuseum/helm-push.git
-    - helm repo add my-nexus "$NEXUS_REPO_HELM_URL" --username "$NEXUS_REPO_USER" --password "$NEXUS_REPO_PASS"
+      # Диагностика: выведем длины и попробуем curl HEAD запросом
+    - echo "URL=[$NEXUS_REPO_HELM_URL] USER=[$NEXUS_REPO_USER] PASS_LEN=[${#NEXUS_REPO_PASS}]"
+    - curl -sSI -u "$NEXUS_REPO_USER:$NEXUS_REPO_PASS" "${NEXUS_REPO_HELM_URL%/}/index.yaml" | head -n1 || true
+    - helm repo add my-nexus "$NEXUS_REPO_HELM_URL" --username "$NEXUS_REPO_USER" --password "$NEXUS_REPO_PASS" --pass-credentials
     - helm repo update
   script:
     - cd sausage-store-chart
@@ -37,7 +40,7 @@ deploy-helm:
     - mkdir -p $HOME/.kube
     - echo -n $KUBE_CONFIG | base64 -d > $HOME/.kube/config
   script:
-    - helm repo add my-nexus $NEXUS_REPO_HELM_URL --username ${NEXUS_REPO_USER} --password $NEXUS_REPO_PASS
+    - helm repo add my-nexus $NEXUS_REPO_HELM_URL --username ${NEXUS_REPO_USER} --password $NEXUS_REPO_PASS --pass-credentials
     - helm repo update
     - |
       helm upgrade --install sausage-store nexus/sausage-store \
