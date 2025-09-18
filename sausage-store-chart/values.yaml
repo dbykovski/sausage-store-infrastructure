@@ -6,6 +6,10 @@ global:
   environment: test
   imageRegistry: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store/sausage-backend:latest
 
+secrets:
+  postgres_datasource: ""
+  dockerConfigJson: ""
+
 backend:
   name: sausage-backend
   revisionHistoryLimit: 12
