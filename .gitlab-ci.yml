@@ -50,6 +50,5 @@ deploy-helm:
         --set-string secrets.postgres_datasource="${SPRING_DATASOURCE_URL}" \
         --set-string 'secrets.dockerConfigJson='"${DOCKER_CONFIG_JSON}" \
         --atomic --timeout 15m \
-        --namespace sausage --create-namespace
   after_script:
     - rm $HOME/.kube/config
