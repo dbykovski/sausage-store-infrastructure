@@ -8,6 +8,8 @@ metadata:
 data:
   nginx.conf: |
     server {
+      listen 80 default_server;
+      server_name _;
 
       location / {
         root   /app/frontend;

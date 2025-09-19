@@ -17,31 +17,19 @@ spec:
       labels:
         app: "{{ .Values.name }}"
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                      - frontend
       containers:
-        - image: {{ .Values.global.imageRegistry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}
-          name: "{{ .Values.name }}"
+        - name: "{{ .Values.name }}"
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: IfNotPresent
           resources:
             requests:
-              memory: {{ .Values.resources.requests.memory }}
-              cpu: {{ .Values.resources.requests.cpu }}
+              cpu: {{ .Values.resources.requests.cpu | quote }}
+              memory: {{ .Values.resources.requests.memory | quote }}
             limits:
-              memory: {{ .Values.resources.limits.memory }}
-              cpu: {{ .Values.resources.limits.cpu }}
-          env:
-            - name: BACKEND_URL
-              value: "http://localhost/api"
+              cpu: {{ .Values.resources.limits.cpu | quote }}
+              memory: {{ .Values.resources.limits.memory | quote }}
           ports:
-            - name: frontend
+            - name: http
               containerPort: {{ .Values.port }}
           volumeMounts:
             - name: nginx-conf
@@ -51,6 +39,6 @@ spec:
       volumes:
         - name: nginx-conf
           configMap:
-            name: nginx-conf-{{ .Release.Name }}
+            name: "nginx-conf-{{ .Release.Name }}"
       imagePullSecrets:
         - name: docker-config-secret-helm
