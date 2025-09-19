@@ -6,7 +6,6 @@ metadata:
     {{- include "sausage-store.labels" . | nindent 4 }}
 spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
-  replicas: {{ .Values.replicas }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -21,19 +20,9 @@ spec:
         app: "{{ .Values.name }}"
     spec:
       containers:
-        - image: {{ .Values.global.imageRegistry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+        - image: "{{ .Values.global.imageRegistry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           name: "{{ .Values.name }}"
           imagePullPolicy: IfNotPresent
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: "{{ .Values.global.springDatasourceUrl }}"
-            - name: BACKEND_PORT
-              value: {{ .Values.global.backend_port }}
-            - name: SPRING_FLYWAY_BASELINE
-              value: "{{ .Values.global.springFlywayBaseline }}"
-          ports:
-            - name: backend-report
-              containerPort: {{ .Values.global.backendPort | int }}
           livenessProbe:
             httpGet:
               path: /actuator/health
@@ -42,5 +31,13 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 2
             failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: {{ .Values.global.backendPort | int }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
       imagePullSecrets:
         - name: docker-config-secret-helm

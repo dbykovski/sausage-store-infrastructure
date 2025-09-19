@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "sausage-store.labels" . | nindent 4 }}
 data:
-  nginx.conf: |
+  default.conf: |
     server {
       listen 80 default_server;
       server_name _;
@@ -17,6 +17,6 @@ data:
       }
 
       location /api {
-          proxy_pass http://backend:{{ .Values.global.backendPort | int }};
+        proxy_pass http://backend:{{ .Values.global.backendPort | int }};
       }
     }
