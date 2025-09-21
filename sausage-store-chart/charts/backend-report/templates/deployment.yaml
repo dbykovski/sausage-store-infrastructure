@@ -23,8 +23,15 @@ spec:
         - image: "{{ .Values.global.imageRegistry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           name: "{{ .Values.name }}"
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu | default "200m" | quote }}
+              memory: {{ .Values.resources.requests.memory | default "200Mi" | quote }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu | default "300m" | quote }}
+              memory: {{ .Values.resources.limits.memory | default "512Mi" | quote }}
           env:
-            - name: REPORTS_MONGODB_URI
+            - name: DB
               valueFrom:
                 secretKeyRef:
                   name: mongodb-helm
