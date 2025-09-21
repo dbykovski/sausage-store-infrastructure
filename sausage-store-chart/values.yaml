@@ -1,13 +1,9 @@
 global:
-  springDatasourceUrl: ${SPRING_DATASOURCE_URL}
   backendPort: 8080
   springFlywayBaseline: true
   appName: sausage-store
   environment: test
   imageRegistry: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store
-secrets:
-  postgres_datasource: ""
-  dockerConfigJson: ""
 
 backend:
   name: backend

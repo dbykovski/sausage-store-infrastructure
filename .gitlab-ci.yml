@@ -44,6 +44,7 @@ deploy-helm:
         --set global.environment=test \
         --set frontend.fqdn="${SAUSAGE_STORE_URL}" \
         --set-string secrets.postgres_datasource="${SPRING_DATASOURCE_URL}" \
+        --set-string secrets.mongodb_datasource="${SPRING_DATA_MONGODB_URI}" \
         --set-string secrets.dockerConfigJson="${DOCKER_CONFIG_JSON}" \
         --atomic --timeout 15m
   after_script:

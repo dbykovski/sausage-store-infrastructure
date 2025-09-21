@@ -30,6 +30,11 @@ spec:
                 secretKeyRef:
                   name: postgres-helm
                   key: postgres_datasource
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-helm
+                  key: mongodb_datasource
             - name: BACKEND_PORT
               value: "{{ .Values.global.backendPort }}"
             - name: SPRING_FLYWAY_BASELINE
