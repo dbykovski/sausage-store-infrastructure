@@ -4,6 +4,9 @@ stages:
 
 variables:
   VERSION: 0.1.${CI_PIPELINE_ID}
+  BACKEND_DOCKER_TAG: "latest"
+  FRONTEND_DOCKER_TAG: "latest"
+  BACKEND_REPORT_DOCKER_TAG: "latest"
 
 upload-helm:
   stage: release
@@ -49,3 +52,22 @@ deploy-helm:
         --atomic --timeout 15m
   after_script:
     - rm $HOME/.kube/config
+
+deploy-argocd:
+  stage: deploy
+  image: argoproj/argocd:v2.3.3
+  environment:
+    name: dev-helm
+    url: https://$SAUSAGE_STORE_URL
+  script:
+    - >
+      argocd --grpc-web --auth-token $ARGO_TOKEN \
+            --server $ARGO_SERVER app set $ARGO_APP --revision $VERSION \
+            -p environment=test \
+            -p frontend.fqdn=${SAUSAGE_STORE_URL} \
+            -p secrets.postgres_datasource=${SPRING_DATASOURCE_URL}\
+            -p secrets.mongodb_datasource=${SPRING_DATA_MONGODB_URI}\
+            -p secrets.dockerConfigJson=${DOCKER_CONFIG_JSON} \
+            -p backend.image.tag=${BACKEND_DOCKER_TAG} \
+            -p frontend.image.tag=${FRONTEND_DOCKER_TAG} \
+            -p backend-report.image.tag=${BACKEND_REPORT_DOCKER_TAG}
