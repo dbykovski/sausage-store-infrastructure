@@ -57,13 +57,5 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 2
             failureThreshold: 6
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: {{ .Values.global.backendPort | int }}
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 2
-            failureThreshold: 3
       imagePullSecrets:
         - name: docker-config-secret-helm
