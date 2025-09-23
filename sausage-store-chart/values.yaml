@@ -38,10 +38,10 @@ backend-report:
   name: backend-report
   revisionHistoryLimit: 12
   strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxUnavailable: 1
-    maxSurge: 20%
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 20%
   image:
     name: "sausage-backend-report"
     tag: "latest"

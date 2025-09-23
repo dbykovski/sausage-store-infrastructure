@@ -24,6 +24,8 @@ spec:
         - image: "{{ .Values.global.imageRegistry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           name: "{{ .Values.name }}"
           imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.global.backendPort | int }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu | default "200m" | quote }}
