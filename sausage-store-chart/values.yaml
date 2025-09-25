@@ -1,0 +1,76 @@
+global:
+  backendPort: 8080
+  springFlywayBaseline: true
+  appName: sausage-store
+  environment: test
+  imageRegistry: gitlab.praktikum-services.ru:5050/std-ext-019-01/sausage-store
+
+backend:
+  name: backend
+  revisionHistoryLimit: 12
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 20%
+  image:
+    name: "sausage-backend"
+    tag: "latest"
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "200Mi"
+    limits:
+      cpu: "300m"
+      memory: "512Mi"
+  vpa:
+    updateMode: "Off"
+    resources:
+      minAllowed:
+        cpu: 0m
+        memory: 0Mi
+      maxAllowed:
+        cpu: 500m
+        memory: 500Mi
+
+backend-report:
+  name: backend-report
+  revisionHistoryLimit: 12
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 20%
+  image:
+    name: "sausage-backend-report"
+    tag: "latest"
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "200Mi"
+    limits:
+      cpu: "300m"
+      memory: "512Mi"
+  hpa:
+    resources:
+      minReplicas: 2
+      maxReplicas: 5
+      averageUtilization: 75
+
+frontend:
+  name: frontend
+  revisionHistoryLimit: 12
+  fqdn: "std-ext-019-01.k8s.praktikum-services.tech"
+  port: 80
+  replicas: 1
+  image:
+    name: "sausage-frontend"
+    tag: "latest"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "64Mi"
+    limits:
+      cpu: "200m"
+      memory: "128Mi"
