@@ -1,93 +1,109 @@
-# infrastructure
+**Плюсы**
+
+_1. Отказоустойчивость и доступность_
+
+Возможность active-active или active-passive между регионами/провайдерами.
+
+При сбое AWS (EC2/EKS/RDS) можно переключить трафик на Yandex Cloud (Compute Cloud/MKS/Managed PostgreSQL).
+
+DNS/LB на уровне SaaS (Cloudflare) или PaaS (Route 53) дают гибкое управление фейловером.
+
+_2. Независимость от одного вендора_
+
+Если использовать IaaS (Yandex Compute Cloud, AWS EC2), то можно переносить GitLab Runner, Nexus, Мониторинг между облаками.
+
+PaaS (EKS/MKS, RDS, Managed PostgreSQL) всё же завязаны на API провайдера, но мультиоблако позволяет не быть «заложником» одной платформы.
+
+_3. Гибкость в выборе моделей_
+
+Можно смешивать:
+
+GitLab SaaS (быстро и без админства),
+
+Nexus на IaaS VM (EC2/Compute Cloud/Droplets) для полного контроля,
+
+БД как PaaS (RDS/YC Managed PostgreSQL),
+
+MongoDB Atlas (SaaS) для удобства.
+
+Это даёт оптимальный баланс «где удобнее — SaaS, где критично — IaaS».
+
+_4. География и юрисдикция_
+
+AWS даёт глобальные регионы (например, Frankfurt),
+
+Yandex Cloud даёт размещение в России (ru-central1).
+→ Можно соответствовать требованиям разных регуляторов/законов о данных.
 
 
+**Минусы**
 
-## Getting started
+_1. Сложность инфраструктуры_
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+GitOps/CI/CD приходится строить с учётом двух окружений.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Monitoring/Logging: централизовать метрики с EKS + MKS и БД из разных облаков сложнее.
 
-## Add your files
+Для IaaS VM (EC2, Compute Cloud) нужно поддерживать образы/обновления отдельно.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+_2. Сетевые задержки и межкластерные связи_
 
-```
-cd existing_repo
-git remote add origin https://gitlab.praktikum-services.ru/std-ext-019-01/infrastructure.git
-git branch -M main
-git push -uf origin main
-```
+Репликация PostgreSQL или MongoDB между AWS и Yandex Cloud → задержки, возможны конфликты.
 
-## Integrate with your tools
+Нужны решения уровня CDC (Change Data Capture), logical replication.
 
-- [ ] [Set up project integrations](https://gitlab.praktikum-services.ru/std-ext-019-01/infrastructure/-/settings/integrations)
+Для SaaS (Atlas, GitLab.com) latency до датацентров тоже может быть фактором.
 
-## Collaborate with your team
+_3. Стоимость_
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+Два облака = дублирование ресурсов (Ingress, LB, кластеров, баз).
 
-## Test and Deploy
+SaaS удобен, но дороже в долгую (например, MongoDB Atlas).
 
-Use the built-in continuous integration in GitLab.
+IaaS дешевле по цене ресурса (EC2 / Compute Cloud / Droplets), но дороже по операционным трудозатратам.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+_4. Вендор-специфика PaaS_
 
-***
+AWS RDS ≠ YC Managed PostgreSQL (разные API/ограничения).
 
-# Editing this README
+EKS ≠ MKS (разные версии, CSI-драйверы, интеграции).
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Придётся унифицировать Helm-чарты и CRD, чтобы один манифест работал в обоих.
 
-## Suggestions for a good README
+**Особенности**
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+_1. Слои:_
 
-## Name
-Choose a self-explaining name for your project.
+IaaS:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+AWS EC2, Yandex Compute Cloud (аналог GCP Compute Engine, DigitalOcean Droplets).
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Используются для GitLab Runner, Nexus, собственных сервисов мониторинга.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+PaaS:
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+AWS EKS, Yandex MKS — управляемый Kubernetes.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+AWS RDS, Yandex Managed PostgreSQL.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Container Registry (ECR / YC CR).
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+SaaS:
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+GitLab.com, MongoDB Atlas, Cloudflare (DNS/WAF), Grafana Cloud.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+_2. Failover/DNS:_
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Route 53 (AWS, PaaS) или Cloudflare (SaaS) делают health-check и переводят трафик в нужное облако.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+_3. Мониторинг:_
 
-## License
-For open source projects, say how it is licensed.
+Можно SaaS (Datadog/Grafana Cloud), но часто используют гибрид (Prometheus/Loki в IaaS VM или PaaS Kubernetes + экспорт в централизованное SaaS).
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+_4. Данные:_
+
+PostgreSQL: Репликация между RDS и YC Managed PostgreSQL.
+
+MongoDB: Репликация между Atlas и YC VM/Managed MongoDB.
+
+Для IaaS: свои инстансы на Virtual Machines (EC2/Compute Cloud/Droplets).
