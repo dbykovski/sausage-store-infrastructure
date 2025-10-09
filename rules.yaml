@@ -1,0 +1,57 @@
+---
+groups:
+  - name: Sausage store rules
+    rules:
+    - alert: InstanceDown
+      expr: up{app="backend"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        project: "sausage_store"
+        component: "Backend"
+      annotations:
+        summary: "Backend instance is down"
+        description: "app=backend не отвечает (up=0)."
+
+    - alert: Http500Errors
+      expr: rate(http_server_requests_seconds_count{app="backend",status="500"}[2m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+        project: "sausage_store"
+        component: "Backend API"
+      annotations:
+        summary: "Обнаружены ответы 500"
+        description: "Есть ответы 500 у app=backend за последние 2 минуты."
+
+    - alert: SlowOrdersP95
+      expr: |
+        histogram_quantile(
+          0.95,
+          sum by (le) (
+            rate(http_server_requests_seconds_bucket{
+              app="backend", method="POST", uri="/api/orders", status=~"2.."
+            }[5m])
+          )
+        ) > 0.1
+      for: 5m
+      labels:
+        severity: critical
+        project: "sausage_store"
+        component: "Orders"
+      annotations:
+        summary: "Медленные POST /api/orders (p95 > 100ms)"
+        description: "p95 латентности успешных POST /api/orders > 100ms не менее 5 минут."
+
+    - alert: ActuatorPrometheusErrors
+      expr: rate(http_server_requests_seconds_count{
+              app="backend", uri="/actuator/prometheus", status!~"2.."
+            }[2m]) > 0
+      for: 2m
+      labels:
+        severity: critical
+        project: "sausage_store"
+        component: "Actuator"
+      annotations:
+        summary: "Ошибки на /actuator/prometheus"
+        description: "Наблюдаются не-2xx ответы на /actuator/prometheus за последние 2 минуты."
